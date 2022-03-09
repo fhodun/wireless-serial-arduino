@@ -4,8 +4,8 @@ const int receive_pin = 12;
 
 struct package
 {
-  String message = "co jest panie ferdku";
-  float jakis_numer = 0.0;
+  char message;
+  float jakis_numer;
 };
 
 typedef struct package Package;
@@ -14,25 +14,28 @@ Package data;
 void setup()
 {
   Serial.begin(9600);
+  Serial.println("Setup of receiver.");
   delay(1000);
 
-  // Initialise the IO and ISR
   vw_set_rx_pin(receive_pin);
-  vw_setup(500); // Bits per sec
-  vw_rx_start(); // Start the receiver PLL running
+  vw_setup(500);
+
+  vw_rx_start();
 }
 
 void loop()
 {
-  uint8_t buf[sizeof(data)];
-  uint8_t buflen = sizeof(data);
+  uint8_t buf[VW_MAX_MESSAGE_LEN];
+  uint8_t buflen = VW_MAX_MESSAGE_LEN;
 
-  if (vw_have_message()) // Is there a packet for us?
+  if (vw_have_message())
   {
+    Serial.println("Got a new message!");
+    
     vw_get_message(buf, &buflen);
     memcpy(&data, &buf, buflen);
-    Serial.println("Package:");
-    Serial.println("data.message: %s",data.message);
-    Serial.println("data.message: %s",data.jakis_numer);
+    
+    Serial.println("data.message: " + (String)data.message);
+    Serial.println("data.message: " + (String)data.jakis_numer);
   }
 }

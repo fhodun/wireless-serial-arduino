@@ -1,11 +1,10 @@
 #include <VirtualWire.h>
 
-const int led_pin = 13;
 const int transmit_pin = 12;
 
 struct package
 {
-  String message;
+  char message;
   float jakis_numer;
 };
 
@@ -14,23 +13,24 @@ Package data;
 
 void setup()
 {
-  // Initialise the IO and ISR
+  Serial.begin(9600);
+  Serial.println("Setup of transmitter.");
+ 
   vw_set_tx_pin(transmit_pin);
-  vw_set_ptt_inverted(true); // Required for DR3100
-  vw_setup(500); // Bits per sec
-
-  pinMode(led_pin, OUTPUT);
+  vw_set_ptt_inverted(true);
+  vw_setup(500);
 }
 
 void loop()
 {
-  digitalWrite(led_pin, HIGH); // Flash a light to show transmitting
   readSensor();
 
-  vw_send((uint8_t *)&data, sizeof(data));
-  vw_wait_tx(); // Wait until the whole message is gone
-
-  digitalWrite(led_pin, LOW);
+  if(vw_send((uint8_t *)&data, sizeof(data))){
+    Serial.println("Successfuly sent message.");
+  }else{
+    Serial.println("There was an error of sending message.");
+  }
+  vw_wait_tx();
 
   delay(2000);
 }
@@ -38,6 +38,6 @@ void loop()
 void readSensor()
 {
   delay(1000);
-  data.message = "elo elo 320";
+  data.message = 'e';
   data.jakis_numer = 21.37;
 }
